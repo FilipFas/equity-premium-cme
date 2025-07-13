@@ -1,5 +1,7 @@
 # Enhancing Equity Premium Predictability with RKHS Conditional Mean Embeddings
 
+(THIS IS STILL AN ONGOING PROJECT)
+
 This repository contains the implementation of my Master Thesis project:
 
 **Enhancing Equity Premium Predictability with Reproducing Kernel Hilbert Space Conditional Mean Embeddings**  
@@ -29,16 +31,16 @@ This project explores the use of **Conditional Mean Embeddings (CME)** in **Repr
   Regularization and kernel parameters are optimized using a pooled out-of-sample \( R^2 \) objective.
 
 ---
-
 ## 📁 Project Structure
-
-├── cme_model.py # Core CME logic and kernel support
-├── cleaning.py # Data preprocessing, lags, rolling windows
-├── main_train.py # Hyperparameter tuning via Optuna
-├── main_test.py # Final testing using best config
-├── results/ # Output CSVs for validation and test
-├── data/ # Input macro-financial data (external)
-└── README.md # Project documentation
+```bash
+├── cme.py        # Core CME logic and kernel support
+├── cleaning.py         # Data preprocessing, lags, rolling windows
+├── main_train.py       # Hyperparameter tuning via Optuna
+├── main_test.py        # Final testing using best config
+├── results/            # Output CSVs for validation and test
+├── data/               # Input macro-financial data (external)
+└── README.md           # Project documentation
+```
 
 
 ---
@@ -57,7 +59,7 @@ Install dependencies with:
 
 ```bash
 pip install -r requirements.txt
-
+```
 ## 📊 Evaluation Metrics
 
 The model is evaluated using:
