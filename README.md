@@ -33,14 +33,28 @@ This project explores the use of **Conditional Mean Embeddings (CME)** in **Repr
 ---
 ## 📁 Project Structure
 ```bash
-├── config.py           # Configuration setup
-├── cme.py              # Core CME logic and kernel support
-├── cleaning.py         # Data preprocessing, lags, rolling windows
-├── main_train.py       # Hyperparameter tuning via Optuna
-├── main_test.py        # Final testing using best config
-├── results/            # Output CSVs for validation and test
-├── data/               # Input macro-financial data (external)
-└── README.md           # Project documentation
+equity-premium-cme/
+├── data/                    # Raw input data (external)
+│   ├── Data2023_annual.csv
+│   ├── Data2023_quarterly.csv
+│   └── Data2023_monthly.csv
+├── src/                     # Core source code
+│   ├── __init__.py
+│   ├── config.py            # Global configuration
+│   ├── cleaning.py          # DataCleaner, MultiFrequencyCleaner
+│   ├── cme.py               # CME implementation
+├── experiments/             # Entry points for training/testing
+│   ├── main_train.py
+│   ├── main_test.py
+│   └── analyze_results.py   # Summary tables, plots
+├── results/                 # Output CSVs and plots
+│   ├── polynomial_multivar_train_results.csv
+│   ├── TEST_polynomial_multivar_results.csv
+│   └── figures/
+├── LICENSE
+├── README.md
+└── requirements.txt
+
 ```
 
 
