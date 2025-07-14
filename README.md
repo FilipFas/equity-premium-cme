@@ -33,7 +33,8 @@ This project explores the use of **Conditional Mean Embeddings (CME)** in **Repr
 ---
 ## 📁 Project Structure
 ```bash
-├── cme.py        # Core CME logic and kernel support
+├── config.py           # Configuration setup
+├── cme.py              # Core CME logic and kernel support
 ├── cleaning.py         # Data preprocessing, lags, rolling windows
 ├── main_train.py       # Hyperparameter tuning via Optuna
 ├── main_test.py        # Final testing using best config
