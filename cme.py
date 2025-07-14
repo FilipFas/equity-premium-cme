@@ -1,4 +1,21 @@
+"""
+cme.py
+
+This module defines the ConditionalMeanEmbedding class for modeling
+Conditional Mean Embedding (CME) operations and provides an Optuna-compatible
+objective for hyperparameter tuning:
+
+    1) Kernel-based Gram matrix computation (RBF, ARD-RBF, Laplacian,
+       Matern, polynomial)
+    2) Regularized fitting of the CME operator
+    3) Prediction on new input data
+    4) Pooled R² evaluation across multiple train–validation splits
+    5) Optuna objective function for automated hyperparameter optimization
+
+Author: Filippo Fasoli
+"""
 import numpy as np
+
 from sklearn.gaussian_process.kernels import RBF, Matern
 from sklearn.metrics.pairwise import laplacian_kernel, polynomial_kernel
 
