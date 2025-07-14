@@ -1,67 +1,78 @@
+"""
+main.train.py
+
+This script orchestrates the end-to-end workflow for:
+    1) Cleaning and preprocessing time‐series data at multiple frequencies
+    2) Tuning the Covariate‐Adjusted Mean Estimator (CME) model via Optuna
+    3) Aggregating and persisting performance metrics for subsequent analysis
+
+Author: Filippo Fasoli
+"""
+
 import pandas as pd
 import optuna
+
+# Custom modules for data cleaning and model evaluation
 from cleaning import MultiFrequencyCleaner
-from cme import ConditionalMeanEmbedding, optuna_objective
+from cme import optuna_objective
+from config import CLEANING_CONFIG, OPTUNA_TRIALS, FIXED_KERNEL
 
-# 1) Define kernel to use for all frequencies (can be passed via argparse or config)
-FIXED_KERNEL = "polynomial"
-
-# 2) Define cleaning + lag + rolling config per frequency
-config = {
-    'annual': {
-        'filepath': '/Your_Path/Data2023_annual.csv',
-        'output_dir': '/Your_Path',
-        'log_vars': ['cfacc', 'eqis'],
-        'std_vars': ['accrul', 'gpce', 'cfacc_log', 'eqis_log'],
-        'date_col': 'yyyy',
-        'start_date': 1965
-    },
-    'quarterly': {
-        'filepath': '/Your_Path/Data2023_quarterly.csv',
-        'output_dir': '/Your_Path',
-        'std_vars': ['pce', 'crdstd', 'i/k'],
-        'date_col': 'yyyyq',
-        'start_date': 19902
-    },
-    'monthly': {
-        'filepath': '/Your_Path/Data2023_monthly.csv',
-        'output_dir': '/Your_Path',
-        'log_vars': ['tbl', 'lty'],
-        'std_vars': ['tbl_log', 'lty_log'],
-        'date_col': 'yyyymm',
-        'start_date': 192601
-    }
-}
-
-# 3) Run full data cleaning pipeline
-cleaner = MultiFrequencyCleaner(config)
+# -----------------------------------------------------------------------------
+# Step 1: Execute the full data cleaning pipeline
+# -----------------------------------------------------------------------------
+# Instantiate the cleaning class with user-defined parameters.
+# This will handle missing values, feature engineering, and
+# alignment of multiple time‐series frequencies.
+cleaner = MultiFrequencyCleaner(CLEANING_CONFIG)
 cleaner.run_all()
+
+# After cleaning is complete, retrieve the train/validation/test splits
+# organized by frequency: annual, quarterly, and monthly.
 splits = cleaner.get_splits()
 
-# 4) Tune CME model for each frequency
+# -----------------------------------------------------------------------------
+# Step 2: Hyperparameter tuning of the CME model for each frequency
+# -----------------------------------------------------------------------------
 results = []
+
 for freq in ['annual', 'quarterly', 'monthly']:
-    print(f"\n🔧 Tuning CME for {freq.upper()} frequency...")
-    split_list = splits[freq]
+        print(f"\n🔧 Tuning CME for {freq.upper()} frequency...")
+        
+        # Select the appropriate data split for the current frequency
+        split_list = splits[freq]
+        
+        # Create an Optuna study to maximize the R² metric
+        # The `optuna_objective` encapsulates:
+        #   - fitting the model on the training fold
+        #   - evaluating on the validation fold
+        #   - returning the R² score as the optimization target
+        study = optuna.create_study(direction="maximize")
+        study.optimize(
+                lambda trial: optuna_objective(trial, split_list, FIXED_KERNEL),
+                n_trials=OPTUNA_TRIALS
+        )
 
-    study = optuna.create_study(direction="maximize")
-    study.optimize(lambda t: optuna_objective(t, split_list, FIXED_KERNEL), n_trials=100)
+        # Extract the best performing hyperparameters and associated R²
+        best_params = study.best_params
+        best_r2     = study.best_value
 
-    best_params = study.best_params
-    best_r2 = study.best_value
+        # Record the results for later aggregation
+        results.append({
+                "frequency":   freq,
+                "kernel":      FIXED_KERNEL,
+                "pooled_R2":   best_r2,
+                "best_params": best_params
+        })
 
-    # Save results
-    results.append({
-        "frequency": freq,
-        "kernel": FIXED_KERNEL,
-        "pooled_R2": best_r2,
-        "best_params": best_params
-    })
+        print(f"✅ Done tuning {freq}. Best R²: {best_r2:.3f}")
 
-    print(f"✅ Done tuning {freq}. Best R²: {best_r2:.3f}")
-
-# 5) Save validation results to CSV
-
+# -----------------------------------------------------------------------------
+# Step 3: Persist the tuning results for downstream analysis
+# -----------------------------------------------------------------------------
+# Convert the list of dicts into a pandas DataFrame, then save as CSV.
+# This file can be used for reporting, visualization, or further validation.
 val_df = pd.DataFrame(results)
-val_df.to_csv(f"{FIXED_KERNEL}_multivar_train_results.csv", index=False)
-print("\n✅ All frequencies tuned. Validation results saved.")
+output_filename = f"{FIXED_KERNEL}_multivar_train_results.csv"
+val_df.to_csv(output_filename, index=False)
+
+print(f"\n✅ All frequencies tuned. Validation results saved to {output_filename}.")
