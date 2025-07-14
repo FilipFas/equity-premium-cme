@@ -1,0 +1,6 @@
+pandas>=1.3
+numpy>=1.21
+scikit-learn>=1.0
+scipy>=1.7
+optuna>=3.0
+statsmodels>=0.13
