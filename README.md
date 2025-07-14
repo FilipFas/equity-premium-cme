@@ -43,9 +43,9 @@ equity-premium-cme/
 │   ├── config.py            # Global configuration
 │   ├── cleaning.py          # DataCleaner, MultiFrequencyCleaner
 │   ├── cme.py               # CME implementation
-├── experiments/             # Entry points for training/testing
-│   ├── main_train.py
-│   ├── main_test.py
+├── main/             # Entry points for training/testing
+│   ├── train.py
+│   ├── test.py
 │   └── analyze_results.py   # Summary tables, plots
 ├── results/                 # Output CSVs and plots
 │   ├── polynomial_multivar_train_results.csv
